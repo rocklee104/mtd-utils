@@ -66,6 +66,7 @@ void ubigen_info_init(struct ubigen_info *ui, int peb_size, int min_io_size,
 struct ubi_vtbl_record *ubigen_create_empty_vtbl(const struct ubigen_info *ui)
 {
 	struct ubi_vtbl_record *vtbl;
+	uint32_t crc;
 	int i;
 
 	vtbl = calloc(1, ui->vtbl_size);
@@ -74,11 +75,9 @@ struct ubi_vtbl_record *ubigen_create_empty_vtbl(const struct ubigen_info *ui)
 		return NULL;
 	}
 
-	for (i = 0; i < ui->max_volumes; i++) {
-		uint32_t crc = mtd_crc32(UBI_CRC32_INIT, &vtbl[i],
-				     UBI_VTBL_RECORD_SIZE_CRC);
+	crc = mtd_crc32(UBI_CRC32_INIT, &vtbl[0], UBI_VTBL_RECORD_SIZE_CRC);
+	for (i = 0; i < ui->max_volumes; i++)
 		vtbl[i].crc = cpu_to_be32(crc);
-	}
 
 	return vtbl;
 }
